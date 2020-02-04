@@ -3,8 +3,8 @@ package uk.gov.ida.notification.eidassaml;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import engineering.reliability.gds.metrics.config.PrometheusConfiguration;
 import io.dropwizard.Configuration;
+import io.dropwizard.client.JerseyClientConfiguration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
-import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -19,19 +19,28 @@ public class EidasSamlParserConfiguration extends Configuration implements Prome
 
     @JsonProperty
     @Valid
-    private ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
+    private final ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
 
-    @JsonProperty
     @Valid
     @NotNull
-    private TrustStoreBackedMetadataConfiguration connectorMetadataConfiguration;
+    @JsonProperty
+    private final JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
+
+    @Valid
+    @NotNull
+    @JsonProperty
+    private URI metatronUri;
+
+    public URI getMetatronUrl() {
+        return metatronUri;
+    }
+
+    public JerseyClientConfiguration getClientConfig() {
+        return clientConfig;
+    }
 
     public ReplayCheckerConfiguration getReplayChecker() {
         return replayChecker;
-    }
-
-    public TrustStoreBackedMetadataConfiguration getConnectorMetadataConfiguration() {
-        return connectorMetadataConfiguration;
     }
 
     public URI getProxyNodeAuthnRequestUrl() {
@@ -42,4 +51,5 @@ public class EidasSamlParserConfiguration extends Configuration implements Prome
     public boolean isPrometheusEnabled() {
         return true;
     }
+
 }
