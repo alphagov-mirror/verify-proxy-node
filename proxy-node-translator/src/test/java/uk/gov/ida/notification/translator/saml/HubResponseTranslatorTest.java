@@ -14,6 +14,7 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResp
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.shared.proxy.MetatronProxy;
 import uk.gov.ida.saml.core.domain.NonMatchingAttributes;
 import uk.gov.ida.saml.core.domain.NonMatchingTransliterableAttribute;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
@@ -44,7 +45,7 @@ public class HubResponseTranslatorTest {
     }
 
     private static final HubResponseTranslator TRANSLATOR =
-            new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL", "NATIONALITY_CODE");
+            new HubResponseTranslator(new MetatronProxy(null, null),EidasResponseBuilder::instance, "Issuer");
 
     private AttributesBuilder attributesBuilder;
 
@@ -244,6 +245,7 @@ public class HubResponseTranslatorTest {
                 "_request-id_of-20-chars-or-more",
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
+                URI.create("http://localhost:8081/bob"),
                 URI.create("http://localhost:8081/bob"),
                 STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
     }

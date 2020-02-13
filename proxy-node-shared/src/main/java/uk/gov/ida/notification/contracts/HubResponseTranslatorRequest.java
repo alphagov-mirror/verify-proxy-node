@@ -53,12 +53,14 @@ public class HubResponseTranslatorRequest {
             String eidasRequestId,
             String levelOfAssurance,
             URI destinationUrl,
+            URI eidasIssuer,
             String connectorEncryptionCertificate) {
         this.samlResponse = samlResponse;
         this.requestId = requestId;
         this.eidasRequestId = eidasRequestId;
         this.levelOfAssurance = levelOfAssurance;
         this.destinationUrl = destinationUrl;
+        this.eidasIssuer = eidasIssuer;
         this.connectorEncryptionCertificate = connectorEncryptionCertificate;
     }
 
@@ -72,6 +74,10 @@ public class HubResponseTranslatorRequest {
 
     public String getEidasRequestId() {
         return eidasRequestId;
+    }
+
+    public URI getEidasIssuer() {
+        return eidasIssuer;
     }
 
     public String getConnectorEncryptionCertificate() {

@@ -22,10 +22,9 @@ public class EidasResponseGenerator {
         this.samlObjectSigner = samlObjectSigner;
     }
 
-    public Response generateFromHubResponse(HubResponseContainer hubResponseContainer, X509Certificate encryptionCertificate) {
+    public Response generateFromHubResponse(HubResponseContainer hubResponseContainer) {
         final Response eidasResponse = hubResponseTranslator.getTranslatedHubResponse(hubResponseContainer);
-        final Response eidasResponseWithEncryptedAssertion = encryptAssertions(eidasResponse, encryptionCertificate);
-        return signSamlResponse(eidasResponseWithEncryptedAssertion, hubResponseContainer.getEidasRequestId());
+        return signSamlResponse(eidasResponse, hubResponseContainer.getEidasRequestId());
     }
 
     public Response generateFailureResponse(javax.ws.rs.core.Response.Status responseStatus, String eidasRequestId, String destinationUrl) {
@@ -33,11 +32,7 @@ public class EidasResponseGenerator {
         return signSamlResponse(eidasResponse, eidasRequestId);
     }
 
-    private Response encryptAssertions(Response eidasResponse, X509Certificate encryptionCertificate) {
-        final BasicX509Credential encryptionCredential = new BasicX509Credential(encryptionCertificate);
-        final ResponseAssertionEncrypter assertionEncrypter = new ResponseAssertionEncrypter(encryptionCredential);
-        return assertionEncrypter.encrypt(eidasResponse);
-    }
+
 
     private Response signSamlResponse(Response eidasResponse, String eidasRequestId) {
         try {

@@ -219,6 +219,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
                 STUB_COUNTRY_PUBLIC_PRIMARY_CERT
             );
 
@@ -237,6 +238,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         "_request-id_of-20-characters-or-more",
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
+                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
                         URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
                         STUB_COUNTRY_PUBLIC_PRIMARY_CERT
                 );

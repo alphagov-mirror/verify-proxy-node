@@ -4,21 +4,22 @@ import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.shared.proxy.MetatronProxy;
 
 import javax.ws.rs.core.Response.Status;
 import java.util.function.Supplier;
 
 public class EidasFailureResponseGenerator {
 
-    private String connectorNodeIssuerId;
+    private final MetatronProxy metatronProxy;
     private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
 
     public EidasFailureResponseGenerator(
+            MetatronProxy metatronProxy,
             Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
-            String connectorNodeIssuerId,
             String proxyNodeMetadataForConnectorNodeUrl) {
-        this.connectorNodeIssuerId = connectorNodeIssuerId;
+        this.metatronProxy = metatronProxy;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
     }
@@ -30,7 +31,7 @@ public class EidasFailureResponseGenerator {
                 .withInResponseTo(eidasRequestId)
                 .withIssueInstant(DateTime.now())
                 .withDestination(destinationUrl)
-                .withAssertionConditions(connectorNodeIssuerId)
+                .withAssertionConditions("todo from metatron")
                 .build();
     }
 

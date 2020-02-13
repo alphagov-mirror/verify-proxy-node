@@ -38,6 +38,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
                 null,
                 null,
                 null,
+                null,
                 null);
 
         Map<String, List<ConstraintViolation<HubResponseTranslatorRequest>>> nullViolationsMap = validateAndMap(nullRequest);
@@ -53,6 +54,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
                 SAMPLE_EIDAS_REQUEST_ID,
                 SAMPLE_LEVEL_OF_ASSURANCE,
                 URI.create(SAMPLE_DESTINATION_URL),
+                URI.create(SAMPLE_DESTINATION_URL),
                 SAMPLE_CONNECTOR_ENCRYPTION_CERTIFICATE);
 
         Map<String, List<ConstraintViolation<HubResponseTranslatorRequest>>> goodViolationsMap = validateAndMap(goodRequest);
@@ -67,6 +69,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
                 "1_should_fail_because_of_the_first_numeric_character",
                 "_2_is_too_short",
                 "LEVEL_7",
+                URI.create("xyz://something.somewhere/with/an/invalid/protocol"),
                 URI.create("xyz://something.somewhere/with/an/invalid/protocol"),
                 "not a certificate");
 

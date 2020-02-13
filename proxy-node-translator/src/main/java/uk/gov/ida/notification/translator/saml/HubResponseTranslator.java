@@ -3,20 +3,26 @@ package uk.gov.ida.notification.translator.saml;
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.security.x509.BasicX509Credential;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
+import uk.gov.ida.common.shared.security.X509CertificateFactory;
+import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
+import uk.gov.ida.notification.shared.proxy.MetatronProxy;
 import uk.gov.ida.saml.core.domain.NonMatchingVerifiableAttribute;
 
+import java.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,20 +34,21 @@ import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
 
-    private String connectorNodeIssuerId;
     private String proxyNodeMetadataForConnectorNodeUrl;
+    private final MetatronProxy metatronProxy;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
     private String pidPrefix;
+    private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
+
 
     public HubResponseTranslator(
+            MetatronProxy metatronProxy,
             Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
-            String connectorNodeIssuerId,
-            String proxyNodeMetadataForConnectorNodeUrl,
-            String nationalityCode) {
+            String proxyNodeMetadataForConnectorNodeUrl) {
+        this.metatronProxy = metatronProxy;
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
-        this.connectorNodeIssuerId = connectorNodeIssuerId;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
-        this.pidPrefix = String.format("GB/%s/", nationalityCode);
+        this.pidPrefix = String.format("GB/%s/", "TODO country code");
     }
 
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer) {
@@ -86,17 +93,33 @@ public class HubResponseTranslator {
                 .map(EidasAttributeBuilder::build)
                 .collect(Collectors.toList());
 
-        return eidasResponseBuilderSupplier.get()
+        // isser matches
+
+        String entityId = hubResponseContainer.getIssuer().toString();
+        CountryMetadataResponse countryMetadata = metatronProxy.getCountryMetadata(entityId);
+        // todo matches
+        countryMetadata.getEntityId().equals(hubResponseContainer.getIssuer());
+
+        Response response = eidasResponseBuilderSupplier.get()
                 .withIssuer(proxyNodeMetadataForConnectorNodeUrl)
                 .withStatus(getMappedStatusCode(hubResponseContainer.getVspScenario()))
                 .withInResponseTo(hubResponseContainer.getEidasRequestId())
                 .withIssueInstant(now)
                 .withDestination(hubResponseContainer.getDestinationURL())
                 .withAssertionSubject(pid)
-                .withAssertionConditions(connectorNodeIssuerId)
+                .withAssertionConditions(countryMetadata.getEntityId())
                 .withLoa(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
                 .addAssertionAttributeStatement(eidasAttributes)
                 .build();
+        String samlEncryptionCertX509 = countryMetadata.getSamlEncryptionCertX509();
+        X509Certificate certificate = X_509_CERTIFICATE_FACTORY.createCertificate(samlEncryptionCertX509);
+        return encryptAssertions(response, certificate);
+    }
+
+    private Response encryptAssertions(Response eidasResponse, X509Certificate encryptionCertificate) {
+        final BasicX509Credential encryptionCredential = new BasicX509Credential(encryptionCertificate);
+        final ResponseAssertionEncrypter assertionEncrypter = new ResponseAssertionEncrypter(encryptionCredential);
+        return assertionEncrypter.encrypt(eidasResponse);
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")

@@ -47,30 +47,33 @@ public class HubResponseTranslatorResource {
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
     public Response hubResponse(@Valid HubResponseTranslatorRequest hubResponseTranslatorRequest) {
 
-        final TranslatedHubResponse translatedHubResponse =
-                verifyServiceProviderProxy.getTranslatedHubResponse(
-                        new VerifyServiceProviderTranslationRequest(
-                                hubResponseTranslatorRequest.getSamlResponse(),
-                                hubResponseTranslatorRequest.getRequestId(),
-                                hubResponseTranslatorRequest.getLevelOfAssurance()
-                        )
-                );
+        final TranslatedHubResponse translatedHubResponse = getAttributesFromVSP(hubResponseTranslatorRequest);
 
         EidasAuthnResponseAttributesHashLogger.logEidasAttributesHash(
                 translatedHubResponse.getAttributes().orElse(null),
                 translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl());
+        // todo add entity id to above?
 
-        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(
-                new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
-                X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate()));
+        HubResponseContainer hubResponseContainer = new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse);
+        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(hubResponseContainer);
 
         logSamlResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
 
         return Response.ok().entity(samlMessage).build();
+    }
+
+    private TranslatedHubResponse getAttributesFromVSP(@Valid HubResponseTranslatorRequest hubResponseTranslatorRequest) {
+        return verifyServiceProviderProxy.getTranslatedHubResponse(
+                new VerifyServiceProviderTranslationRequest(
+                        hubResponseTranslatorRequest.getSamlResponse(),
+                        hubResponseTranslatorRequest.getRequestId(),
+                        hubResponseTranslatorRequest.getLevelOfAssurance()
+                )
+        );
     }
 
     @POST
