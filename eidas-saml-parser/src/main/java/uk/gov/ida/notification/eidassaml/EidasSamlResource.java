@@ -70,12 +70,12 @@ public class EidasSamlResource {
                                 .orElseThrow();
 
         this.logAuthnRequestMdcProperties(authnRequest);
-        boolean isTransient = NameID.TRANSIENT.equals(authnRequest.getNameIDPolicy().getFormat());
+        boolean transientPid = NameID.TRANSIENT.equals(authnRequest.getNameIDPolicy().getFormat());
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
                 assertionConsumerServiceURL,
-                isTransient);
+                transientPid);
     }
 
     private AuthnRequest unmarshallRequest(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {

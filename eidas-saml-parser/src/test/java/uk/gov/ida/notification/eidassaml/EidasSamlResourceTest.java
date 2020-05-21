@@ -96,11 +96,11 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.getIsTransient()).isEqualTo(false);
+        assertThat(response.isTransient()).isEqualTo(false);
     }
 
     @Test
-    public void shouldReturnTrueWhenNameIdIsTransient() throws Exception {
+    public void shouldReturnTrueWhenNameIdisTransient() throws Exception {
         final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
         NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
         nameIDPolicy.setFormat(NameID.TRANSIENT);
@@ -112,7 +112,7 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.getIsTransient()).isEqualTo(true);
+        assertThat(response.isTransient()).isEqualTo(true);
     }
 
     @Test

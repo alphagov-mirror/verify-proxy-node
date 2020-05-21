@@ -18,6 +18,7 @@ public class HubResponseContainer {
     private final Attributes attributes;
     private final VspScenario vspScenario;
     private final VspLevelOfAssurance levelOfAssurance;
+    private final boolean transientPid;
 
     public HubResponseContainer(
             final HubResponseTranslatorRequest hubResponseTranslatorRequest,
@@ -26,6 +27,7 @@ public class HubResponseContainer {
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
         this.issuer = hubResponseTranslatorRequest.getEidasIssuerEntityId();
+        this.transientPid = hubResponseTranslatorRequest.isTransient();
         this.attributes = translatedHubResponse.getAttributes().orElse(null);
         this.vspScenario = translatedHubResponse.getScenario();
         this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance().orElse(null);
@@ -45,6 +47,10 @@ public class HubResponseContainer {
 
     public URI getIssuer() {
         return issuer;
+    }
+
+    public boolean isTransient() {
+        return transientPid;
     }
 
     Optional<Attributes> getAttributes() {
