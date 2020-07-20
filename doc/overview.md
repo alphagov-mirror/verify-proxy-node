@@ -2,6 +2,9 @@
 
 ## Technical overview
 
+
+
+
 The UK Proxy Node allows GOV.UK Verify to provide identities as part of the eIDAS scheme. This document describes the architecture and behaviour of the UK Proxy Node.
 
 ### Role of the UK Proxy Node
@@ -17,7 +20,9 @@ The role of the UK Proxy Node is to:
  - cryptographically sign all outgoing responses to EU services
  - encrypt the identity assertions sent to the EU services
 
-To understand how the UK Proxy Node works within the eIDAS scheme, see the GOV.UK Verify message flow document submitted for peer review. 
+To understand how the UK Proxy Node works within the eIDAS scheme, see the GOV.UK Verify message flow document submitted for peer review.
+
+The [Proxy Node Journey](journey.md) documents how the UK Proxy Node provides an eIDAS response for an EU Member State. 
 
 ## Components
 
@@ -30,6 +35,7 @@ The Proxy Node contains the following services:
   - [Eidas-Saml-Parser](#eidas-saml-parser)
   - [Translator](#translator)
   - [Verify-Service-Provier](#verify-service-provider)
+  - [Metatron](#verify-service-provider)
 
 ### Gateway
 
@@ -58,9 +64,13 @@ Once the eIDAS SAML response is signed, the Translator service passes it on to t
 The Verify Service Provider (VSP) generates and translates Security Assertion Markup Language (SAML) messages to and from the GOV.UK Verify Hub. 
 The Gateway service uses the VSP to generate SAML requests to send to the Verify Hub. For responses, the Translator service uses the VSP to validate SAML responses and translate them to JSON. 
 
+## Metatron
+The Metatron ingests connector node metadata from countries configured in the `verify-eidas-config` repository.
+The `ESP` and `Translator` call the Metatron which then provides metadata for a country.
+
 ## Connecting to Countries
 
-We will host one instance of the proxy node services and infrastructure isolation per requesting Country connector node. All instances will share a single hardware security module (HSM) but will each have independent credentials to access the HSM, and an independent signing key held by the HSM.
+We will host one instance of the proxy node services for all requesting Country connector nodes.
 
 ## Infrastructure
 
